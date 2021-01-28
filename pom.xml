@@ -51,7 +51,7 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-			<!-- MODEL MAPPER -->
+		<!-- MODEL MAPPER -->
 		<dependency>
 			<groupId>org.modelmapper</groupId>
 			<artifactId>modelmapper</artifactId>
@@ -74,8 +74,6 @@
 			<artifactId>springfox-boot-starter</artifactId>
 			<version>3.0.0</version>
 		</dependency>
-	</dependencies>
-		
 	</dependencies>
 
 	<build>
