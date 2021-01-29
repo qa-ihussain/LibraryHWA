@@ -24,14 +24,15 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.qa.persistence.domain.User;
 import com.qa.persistence.dto.UserDTO;
+import com.qa.persistence.domain.User;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@Sql(scripts = { "classpath:test-schema.sql",
-		"classpath:test-data.sql" }, executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-class DuckControllerIntegrationTest {
+@Sql(scripts = { "classpath:schema-test.sql",
+		"classpath:data-test.sql" }, executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
+
+public class UserControllerIntegrationTest {
 
 	@Autowired
 	private MockMvc mock;
@@ -42,59 +43,61 @@ class DuckControllerIntegrationTest {
 	@Autowired
 	private ObjectMapper mapper;
 
-	private final Duck TEST_DUCK_FROM_DB = new Duck(1L, "Barry", "blue", "pub");
+	private final User TEST_USER_FROM_DB = new User(1L, "Claude", "Duvalier", 23, "cd52", "password", null);
 
-	private DuckDTO mapToDTO(Duck duck) {
-		return this.modelMapper.map(duck, DuckDTO.class);
+	private UserDTO mapToDTO(User user) {
+		return this.modelMapper.map(user, UserDTO.class);
 	}
 
 	@Test
-	void testCreateDuck() throws Exception {
-		final Duck NEW_DUCK = new Duck("Donald", "White", "Toon World");
-		MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.request(HttpMethod.POST, "/duck/createDuck");
+	void testCreateUser() throws Exception {
+		final User NEW_USER = new User(null, "Tasha", "Lee", 17, "tlee", "password", null);
+		MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.request(HttpMethod.POST, "/user/createUser");
 		mockRequest.contentType(MediaType.APPLICATION_JSON);
-		mockRequest.content(this.mapper.writeValueAsString(NEW_DUCK));
+		mockRequest.content(this.mapper.writeValueAsString(NEW_USER));
 		mockRequest.accept(MediaType.APPLICATION_JSON);
 
-		final Duck SAVED_DUCK = new Duck(2L, NEW_DUCK.getName(), NEW_DUCK.getColour(), NEW_DUCK.getHabitat());
+		final User SAVED_USER = new User(3L, NEW_USER.getFirstName(), NEW_USER.getLastName(), NEW_USER.getAge(), NEW_USER.getUserName(), NEW_USER.getPassword(), null);
 
 		ResultMatcher matchStatus = MockMvcResultMatchers.status().isCreated();
 		ResultMatcher matchContent = MockMvcResultMatchers.content()
-				.json(this.mapper.writeValueAsString(this.mapToDTO(SAVED_DUCK)));
-		this.mock.perform(mockRequest).andExpect(matchStatus).andExpect(matchContent);
+				.json(this.mapper.writeValueAsString(this.mapToDTO(SAVED_USER)));
+		this.mock.perform(mockRequest)
+		.andExpect(matchStatus)
+		.andExpect(matchContent);
 
 	}
 
 	@Test
-	void testDeleteDuck() throws Exception {
-		this.mock.perform(request(HttpMethod.DELETE, "/duck/deleteDuck/" + this.TEST_DUCK_FROM_DB.getId()))
+	void testDeleteUser() throws Exception {
+		this.mock.perform(request(HttpMethod.DELETE, "/user/deleteUser/" + this.TEST_USER_FROM_DB.getId()))
 				.andExpect(status().isNoContent());
 	}
 
 	@Test
-	void testGetAllDucks() throws Exception {
-		List<DuckDTO> duckList = new ArrayList<>();
-		duckList.add(this.mapToDTO(TEST_DUCK_FROM_DB));
+	void testGetAllUsers() throws Exception {
+		List<UserDTO> userList = new ArrayList<>();
+		userList.add(this.mapToDTO(TEST_USER_FROM_DB));
 
-		String content = this.mock.perform(request(HttpMethod.GET, "/duck/getAll").accept(MediaType.APPLICATION_JSON))
+		String content = this.mock.perform(request(HttpMethod.GET, "/user/getAllUsers").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
-		assertEquals(this.mapper.writeValueAsString(duckList), content);
+		assertEquals(this.mapper.writeValueAsString(userList), content);
 	}
 
 	@Test
-	void testUpdateDuck() throws Exception {
-		UserDTO newUser = new UserDTO(null, "Sir Duckington esq.", "Blue", "Duckington Manor");
-		User updatedUser = new User(this.TEST_USER_FROM_DB.getId(), newDuck.getName(), newDuck.getColour(),
-				newDuck.getHabitat());
+	void testUpdateUser() throws Exception {
+		UserDTO newUser = new UserDTO(null, "Eren", "Yeager", 17, "eren", "password");
+		User updatedUser = new User(this.TEST_USER_FROM_DB.getId(), newUser.getFirstName(), newUser.getLastName(),
+				newUser.getAge(), newUser.getUserName(), newUser.getPassword(), null);
 
 		String result = this.mock
-				.perform(request(HttpMethod.PUT, "/duck/updateDuck/?id=" + this.TEST_DUCK_FROM_DB.getId())
+				.perform(request(HttpMethod.PUT, "/duck/updateUser/?id=" + this.TEST_USER_FROM_DB.getId())
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-						.content(this.mapper.writeValueAsString(newDuck)))
+						.content(this.mapper.writeValueAsString(newUser)))
 				.andExpect(status().isAccepted()).andReturn().getResponse().getContentAsString();
 
-		assertEquals(this.mapper.writeValueAsString(this.mapToDTO(updatedDuck)), result);
+		assertEquals(this.mapper.writeValueAsString(this.mapToDTO(updatedUser)), result);
 	}
 
 }
