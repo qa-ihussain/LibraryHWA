@@ -5,10 +5,13 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
-import com.qa.persistence.domain.User;
 import com.qa.persistence.dto.UserDTO;
+import com.qa.exceptions.UserNotFoundException;
+import com.qa.persistence.domain.User;
 import com.qa.persistence.repo.UserRepo;
 import com.qa.utils.MyBeanUtils;
 
@@ -16,11 +19,11 @@ import com.qa.utils.MyBeanUtils;
 public class UserService {
 
 	private UserRepo repo;
+
 	private ModelMapper mapper;
 
 	@Autowired
 	public UserService(UserRepo repo, ModelMapper mapper) {
-		super();
 		this.repo = repo;
 		this.mapper = mapper;
 	}
@@ -29,35 +32,40 @@ public class UserService {
 		return this.mapper.map(user, UserDTO.class);
 	}
 
-// CREATE USER
-	public UserDTO addUser(User user) {
-		User saved = this.repo.save(user);
+	private User mapFromDTO(UserDTO user) {
+		return this.mapper.map(user, User.class);
+	}
+
+	public UserDTO createUser(UserDTO userDTO) {
+		User toSave = this.mapFromDTO(userDTO);
+		User saved = this.repo.save(toSave);
 		return this.mapToDTO(saved);
 	}
 
-// READ USER(S)
-	public List<UserDTO> getAllUsers() {
+	public boolean deleteUser(Long id) {
+		if (!this.repo.existsById(id)) {
+			throw new UserNotFoundException();
+		}
+		this.repo.deleteById(id);
+		return !this.repo.existsById(id);
+	}
+
+	public UserDTO findUserByID(Long id) {
+		final User found = this.repo.findById(id)
+				.orElseThrow(() -> {
+					return new ResponseStatusException(HttpStatus.NOT_FOUND, "This user does not exist");
+				});
+		return this.mapToDTO(found);
+	}
+
+	public List<UserDTO> getUser() {
 		return this.repo.findAll().stream().map(this::mapToDTO).collect(Collectors.toList());
 	}
 
-	public UserDTO readOne(Long id) {
-		return this.mapToDTO(this.repo.findById(id).orElseThrow());
-	}
-
-// UPDATE USER
-public UserDTO update(Long id, User user) {
-		
-		User updateUser = this.repo.findById(id).orElseThrow();
-		MyBeanUtils.mergeNotNull(user, updateUser);
-		
-		return this.mapToDTO(this.repo.save(updateUser));
-	}
-
-// DELETE USER
-	public boolean removeUser(Long id) {
-		this.repo.deleteById(id);
-		boolean exists = this.repo.existsById(id);
-		return !exists;
+	public UserDTO updateUser(UserDTO user, Long id) {
+		User toUpdate = this.repo.findById(id).orElseThrow(UserNotFoundException::new);
+		MyBeanUtils.mergeNotNull(user, toUpdate);
+		return this.mapToDTO(this.repo.save(toUpdate));
 	}
 
 }

@@ -7,6 +7,7 @@ import javax.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,12 +17,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.qa.persistence.domain.User;
 import com.qa.persistence.dto.UserDTO;
 import com.qa.services.UserService;
 
 @RestController
 @RequestMapping("/user")
+@CrossOrigin
 public class UserController {
 
 	private UserService service;
@@ -32,34 +33,30 @@ public class UserController {
 		this.service = service;
 	}
 
-// CREATE USER
 	@PostMapping("/createUser")
-	public UserDTO addUser(@RequestBody User user) {
-		return this.service.addUser(user);
+	public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO user) {
+		return new ResponseEntity<>(this.service.createUser(user), HttpStatus.CREATED);
 	}
 
-// READ USER(S)
-	@GetMapping("/readAll")
-	public List<UserDTO> getAllUsers() {
-		return this.service.getAllUsers();
-	}
-
-	@GetMapping("/read/{id}")
-	public ResponseEntity<UserDTO> readUser(@PathVariable("id") Long id) {
-		return ResponseEntity.ok(this.service.readOne(id));
-	}
-
-// UPDATE USER
-	@PutMapping("/update/{id}")
-	public UserDTO updateUser(@PathParam("id") Long id, @RequestBody User user) {
-		return this.service.update(id, user);
-	}
-
-// DELETE USER
-	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<UserDTO> removeUser(@PathVariable("id") Long id) {
-		return this.service.removeUser(id) ? 
-				new ResponseEntity<>(HttpStatus.NO_CONTENT)
+	@DeleteMapping("/deleteUser/{id}")
+	public ResponseEntity<UserDTO> deleteUser(@PathVariable Long id) {
+		return this.service.deleteUser(id) ? new ResponseEntity<>(HttpStatus.NO_CONTENT)
 				: new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+
+	@GetMapping("/getUser/{id}")
+	public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
+		return ResponseEntity.ok(this.service.findUserByID(id));
+	}
+
+	@GetMapping("/getAllUser")
+	public ResponseEntity<List<UserDTO>> getAllUsers() {
+		return ResponseEntity.ok(this.service.getUser());
+	}
+
+	@PutMapping("/updateUser")
+	public ResponseEntity<UserDTO> updateUser(@PathParam("id") Long id, @RequestBody UserDTO user) {
+		return new ResponseEntity<>(this.service.updateUser(user, id), HttpStatus.ACCEPTED);
+	}
+
 }

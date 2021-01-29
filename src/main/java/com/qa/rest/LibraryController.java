@@ -2,6 +2,8 @@ package com.qa.rest;
 
 import java.util.List;
 
+import javax.websocket.server.PathParam;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.qa.persistence.domain.Library;
 import com.qa.persistence.dto.LibraryDTO;
 import com.qa.services.LibraryService;
 
@@ -30,34 +31,30 @@ public class LibraryController {
 		this.service = service;
 	}
 
-// CREATE BOOK
 	@PostMapping("/addBook")
-	public LibraryDTO addBook(@RequestBody Library book) {
-		return this.service.addBook(book);
+	public ResponseEntity<LibraryDTO> addBook(@RequestBody LibraryDTO library) {
+		return new ResponseEntity<>(this.service.addBook(library), HttpStatus.CREATED);
 	}
 
-// READ BOOK(S)
-	@GetMapping("/viewAll")
-	public List<LibraryDTO> getAllBooks() {
-		return this.service.getAllBooks();
-	}
-	
-	@GetMapping("/viewBook/{id}")
-	public ResponseEntity<LibraryDTO> readBook(@PathVariable("id") Long id) {
-		return ResponseEntity.ok(this.service.readOne(id));
+	@DeleteMapping("/deleteBook/{id}")
+	public ResponseEntity<LibraryDTO> deleteBook(@PathVariable Long id) {
+		return this.service.deleteBook(id) ? new ResponseEntity<>(HttpStatus.NO_CONTENT)
+				: new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-// UPDATE BOOK
-	@PutMapping("updateBook/{id}")
-	public ResponseEntity<LibraryDTO> update(@PathVariable("id") Long id,  @RequestBody Library model) {
-		return new ResponseEntity<>(this.service.updateBook(id, model), HttpStatus.ACCEPTED);
+	@GetMapping("/getBook/{id}")
+	public ResponseEntity<LibraryDTO> getBook(@PathVariable Long id) {
+		return ResponseEntity.ok(this.service.findBookByID(id));
 	}
-	
-// DELETE BOOK
-	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<LibraryDTO> removeBook(@PathVariable("id") Long id){
-		return this.service.removeBook(id) ? 
-				new ResponseEntity<>(HttpStatus.NO_CONTENT) :
-				new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+	@GetMapping("/getAllBooks")
+	public ResponseEntity<List<LibraryDTO>> getAllBooks() {
+		return ResponseEntity.ok(this.service.readBooks());
 	}
+
+	@PutMapping("/updateLibrary")
+	public ResponseEntity<LibraryDTO> updateLibrary(@PathParam("id") Long id, @RequestBody LibraryDTO library) {
+		return new ResponseEntity<>(this.service.updateLibrary(library, id), HttpStatus.ACCEPTED);
+	}
+
 }

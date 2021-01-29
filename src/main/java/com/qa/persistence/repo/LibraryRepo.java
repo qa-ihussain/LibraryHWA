@@ -7,9 +7,7 @@ import com.qa.persistence.domain.Library;
 
 @Repository
 public interface LibraryRepo extends JpaRepository<Library, Long> {
+
+	// CRUD FUNCTIONALITY 
 	
-
-	// CRUD FUNCTIONALITY
-
-
 }
