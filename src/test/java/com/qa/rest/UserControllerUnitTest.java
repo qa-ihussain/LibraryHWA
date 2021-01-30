@@ -49,9 +49,9 @@ class UserControllerUnitTest {
 	@BeforeEach
 	void init() {
 		this.userList = new ArrayList<>();
-		this.testUser = this.mapToDTO(new User(id, "Claude", "Duvalier", 23, "cd52", "password", null));
+		this.testUser = this.mapToDTO(new User(id, "Claude", "Duvalier", 23, "cd52", "password"));
 
-		this.testUserWithID = new User(id, testUser.getFirstName(), testUser.getLastName(), testUser.getAge(), testUser.getUserName(), testUser.getPassword(), null);
+		this.testUserWithID = new User(id, testUser.getFirstName(), testUser.getLastName(), testUser.getAge(), testUser.getUserName(), testUser.getPassword());
 		this.testUserWithID.setId(id);
 
 		this.userList.add(testUserWithID);
