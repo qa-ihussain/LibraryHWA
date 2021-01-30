@@ -1,5 +1,6 @@
 package com.qa.rest;
 
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -12,11 +13,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -25,13 +27,15 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qa.persistence.dto.UserDTO;
+import com.qa.LibraryApplication;
 import com.qa.persistence.domain.User;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = LibraryApplication.class)
 @AutoConfigureMockMvc
+@WebAppConfiguration
 @Sql(scripts = { "classpath:schema-test.sql",
 		"classpath:data-test.sql" }, executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-
+@ActiveProfiles(profiles="test")
 public class UserControllerIntegrationTest {
 
 	@Autowired
@@ -43,7 +47,7 @@ public class UserControllerIntegrationTest {
 	@Autowired
 	private ObjectMapper mapper;
 
-	private final User TEST_USER_FROM_DB = new User(1L, "Claude", "Duvalier", 23, "cd52", "password", null);
+	private final User TEST_USER_FROM_DB = new User(1L, "Claude", "Duvalier", 23, "cd52", "password");
 
 	private UserDTO mapToDTO(User user) {
 		return this.modelMapper.map(user, UserDTO.class);
@@ -51,13 +55,13 @@ public class UserControllerIntegrationTest {
 
 	@Test
 	void testCreateUser() throws Exception {
-		final User NEW_USER = new User(null, "Tasha", "Lee", 17, "tlee", "password", null);
+		final User NEW_USER = new User("Tasha", "Lee", 17, "tlee", "password");
 		MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.request(HttpMethod.POST, "/user/createUser");
 		mockRequest.contentType(MediaType.APPLICATION_JSON);
 		mockRequest.content(this.mapper.writeValueAsString(NEW_USER));
 		mockRequest.accept(MediaType.APPLICATION_JSON);
 
-		final User SAVED_USER = new User(3L, NEW_USER.getFirstName(), NEW_USER.getLastName(), NEW_USER.getAge(), NEW_USER.getUserName(), NEW_USER.getPassword(), null);
+		final User SAVED_USER = new User(3L, NEW_USER.getFirstName(), NEW_USER.getLastName(), NEW_USER.getAge(), NEW_USER.getUserName(), NEW_USER.getPassword());
 
 		ResultMatcher matchStatus = MockMvcResultMatchers.status().isCreated();
 		ResultMatcher matchContent = MockMvcResultMatchers.content()
@@ -87,9 +91,9 @@ public class UserControllerIntegrationTest {
 
 	@Test
 	void testUpdateUser() throws Exception {
-		UserDTO newUser = new UserDTO(null, "Eren", "Yeager", 17, "eren", "password");
+		UserDTO newUser = new UserDTO(TEST_USER_FROM_DB.getId(), "Eren", "Yeager", 17, "eren", "password");
 		User updatedUser = new User(this.TEST_USER_FROM_DB.getId(), newUser.getFirstName(), newUser.getLastName(),
-				newUser.getAge(), newUser.getUserName(), newUser.getPassword(), null);
+				newUser.getAge(), newUser.getUserName(), newUser.getPassword());
 
 		String result = this.mock
 				.perform(request(HttpMethod.PUT, "/duck/updateUser/?id=" + this.TEST_USER_FROM_DB.getId())

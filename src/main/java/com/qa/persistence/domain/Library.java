@@ -1,18 +1,12 @@
 package com.qa.persistence.domain;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-//import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,21 +27,34 @@ public class Library {
 	private int pages;
 	private Long ISBN10;
 	private String ISBN13;
+	private int qty;
+	private boolean availability; 
 	
-//	@OneToMany(mappedBy = "pond")
 	@ManyToOne(targetEntity = User.class)
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	private List<User> user = new ArrayList<>();
-	
-	public Library (Long id) {
+	private User users = null;
+
+	public Library(Long id, @NotNull String bookTitle, String author, int pages, Long iSBN10, String iSBN13, int qty,
+			boolean availability) {
+		super();
 		this.id = id;
-	}
-	
-	public Library (String bookTitle, String author, int pages, Long ISBN10, String ISBN13) {
 		this.bookTitle = bookTitle;
 		this.author = author;
 		this.pages = pages;
-		this.ISBN10 = ISBN10;
-		this.ISBN13 = ISBN13;
+		ISBN10 = iSBN10;
+		ISBN13 = iSBN13;
+		this.qty = qty;
+		this.availability = availability;
+	}
+	
+	public Library(@NotNull String bookTitle, String author, int pages, Long iSBN10, String iSBN13, int qty,
+			boolean availability) {
+		super();
+		this.bookTitle = bookTitle;
+		this.author = author;
+		this.pages = pages;
+		ISBN10 = iSBN10;
+		ISBN13 = iSBN13;
+		this.qty = qty;
+		this.availability = availability;
 	}
 }

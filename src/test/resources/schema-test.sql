@@ -8,6 +8,8 @@ isbn13 varchar(255),
 author varchar(255), 
 book_title varchar(255) not null, 
 pages integer not null, 
+qty integer not null,
+availability boolean not null,
 primary key (id)
 ); 
 

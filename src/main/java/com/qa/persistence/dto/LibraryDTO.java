@@ -12,6 +12,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode
+
 public class LibraryDTO {
 
 	private Long id;
@@ -20,6 +21,8 @@ public class LibraryDTO {
 	private int pages;
 	private Long ISBN10;
 	private String ISBN13;
+	private int qty;
+	private boolean availability; 
 	
 	private List<UserDTO> user = new ArrayList<>();
 	
