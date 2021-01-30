@@ -19,7 +19,7 @@ public class LibraryDTO {
 	private String bookTitle;
 	private String author;
 	private int pages;
-	private Long ISBN10;
+	private String ISBN10;
 	private String ISBN13;
 	private int qty;
 	private boolean availability; 

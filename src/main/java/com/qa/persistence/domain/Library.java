@@ -25,7 +25,7 @@ public class Library {
 	private String bookTitle;
 	private String author;
 	private int pages;
-	private Long ISBN10;
+	private String ISBN10;
 	private String ISBN13;
 	private int qty;
 	private boolean availability; 
@@ -33,7 +33,7 @@ public class Library {
 	@ManyToOne(targetEntity = User.class)
 	private User users = null;
 
-	public Library(Long id, @NotNull String bookTitle, String author, int pages, Long iSBN10, String iSBN13, int qty,
+	public Library(Long id, @NotNull String bookTitle, String author, int pages, String iSBN10, String iSBN13, int qty,
 			boolean availability) {
 		super();
 		this.id = id;
@@ -46,7 +46,7 @@ public class Library {
 		this.availability = availability;
 	}
 	
-	public Library(@NotNull String bookTitle, String author, int pages, Long iSBN10, String iSBN13, int qty,
+	public Library(@NotNull String bookTitle, String author, int pages, String iSBN10, String iSBN13, int qty,
 			boolean availability) {
 		super();
 		this.bookTitle = bookTitle;

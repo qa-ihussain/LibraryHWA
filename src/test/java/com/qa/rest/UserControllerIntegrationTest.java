@@ -36,6 +36,7 @@ import com.qa.persistence.domain.User;
 @Sql(scripts = { "classpath:schema-test.sql",
 		"classpath:data-test.sql" }, executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @ActiveProfiles(profiles="test")
+
 public class UserControllerIntegrationTest {
 
 	@Autowired
@@ -48,6 +49,7 @@ public class UserControllerIntegrationTest {
 	private ObjectMapper mapper;
 
 	private final User TEST_USER_FROM_DB = new User(1L, "Claude", "Duvalier", 23, "cd52", "password");
+	private final User TEST_USER2_FROM_DB = new User(2L, "Levi", "Ackerman", 27, "lackerman", "password");
 
 	private UserDTO mapToDTO(User user) {
 		return this.modelMapper.map(user, UserDTO.class);
@@ -82,6 +84,7 @@ public class UserControllerIntegrationTest {
 	void testGetAllUsers() throws Exception {
 		List<UserDTO> userList = new ArrayList<>();
 		userList.add(this.mapToDTO(TEST_USER_FROM_DB));
+		userList.add(this.mapToDTO(TEST_USER2_FROM_DB ));
 
 		String content = this.mock.perform(request(HttpMethod.GET, "/user/getAllUsers").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
@@ -96,7 +99,7 @@ public class UserControllerIntegrationTest {
 				newUser.getAge(), newUser.getUserName(), newUser.getPassword());
 
 		String result = this.mock
-				.perform(request(HttpMethod.PUT, "/duck/updateUser/?id=" + this.TEST_USER_FROM_DB.getId())
+				.perform(request(HttpMethod.PUT, "/user/updateUser/?id=" + this.TEST_USER_FROM_DB.getId())
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
 						.content(this.mapper.writeValueAsString(newUser)))
 				.andExpect(status().isAccepted()).andReturn().getResponse().getContentAsString();

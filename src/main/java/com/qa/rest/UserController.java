@@ -49,7 +49,7 @@ public class UserController {
 		return ResponseEntity.ok(this.service.findUserByID(id));
 	}
 
-	@GetMapping("/getAllUser")
+	@GetMapping("/getAllUsers")
 	public ResponseEntity<List<UserDTO>> getAllUsers() {
 		return ResponseEntity.ok(this.service.getUser());
 	}

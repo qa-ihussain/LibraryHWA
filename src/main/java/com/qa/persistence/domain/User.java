@@ -14,6 +14,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -23,6 +24,7 @@ public class User {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@EqualsAndHashCode.Exclude
 	private Long Id;
 
 	@NotNull
@@ -32,7 +34,7 @@ public class User {
 	private String userName;
 	private String password;
 	
-	@OneToMany(mappedBy = "library")
+	@OneToMany(mappedBy = "users")
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<Library> library = new ArrayList<>();
 	
