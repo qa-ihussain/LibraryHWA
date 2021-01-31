@@ -9,9 +9,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
 public class MyBeanUtils {
-
 	private MyBeanUtils() {
-
 	}
 
 	public static void mergeNotNull(Object source, Object target) {
@@ -20,7 +18,7 @@ public class MyBeanUtils {
 
 	private static String[] getNullPropertyNames(Object source) {
 		final BeanWrapper src = new BeanWrapperImpl(source);
-
+		
 		Set<String> names = new HashSet<>();
 		for (PropertyDescriptor pd : src.getPropertyDescriptors()) {
 			if (src.getPropertyValue(pd.getName()) == null)
@@ -28,5 +26,4 @@ public class MyBeanUtils {
 		}
 		return names.toArray(new String[names.size()]);
 	}
-
 }

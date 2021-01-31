@@ -52,9 +52,9 @@ public class LibraryControllerIntegrationTest {
 	@Autowired
 	private ObjectMapper mapper;
 
-	private final Library TEST_BOOK_FROM_DB = new Library(1L, "The Midnight Library", "Matt Haig", 304, "0525559477", "978-0525559474", 2, TRUE);
-	private final Library TEST_BOOK2_FROM_DB = new Library(2L, "Extraterrestrial: The First Sign of Intelligent Life Beyond Earth", "Avi Loeb", 240, "1529304822", "978-1529304824", 1, FALSE);
-	private final Library TEST_BOOK3_FROM_DB = new Library(3L, "Kakegurui - Compulsive Gambler - Vol. 1", "Homura Kawamoto and Toru Naomura", 240, "0316562890", "978-0316562898", 2, TRUE);
+	private final Library TEST_BOOK_FROM_DB = new Library(1L, "The Midnight Library", "Matt Haig", 304, "Science Fiction", 2, TRUE);
+	private final Library TEST_BOOK2_FROM_DB = new Library(2L, "Extraterrestrial: The First Sign of Intelligent Life Beyond Earth", "Avi Loeb", 240, "Science", 1, FALSE);
+	private final Library TEST_BOOK3_FROM_DB = new Library(3L, "Kakegurui - Compulsive Gambler - Vol. 1", "Homura Kawamoto and Toru Naomura", 240, "Manga", 2, TRUE);
 
 	private LibraryDTO mapToDTO(Library library) {
 		return this.modelMapper.map(library, LibraryDTO.class);
@@ -62,13 +62,13 @@ public class LibraryControllerIntegrationTest {
 
 	@Test
 	void testAddBook() throws Exception {
-		final Library NEW_BOOK = new Library("The Invisible Life of Addie LaRue", "V.E. Schwab", 560, "1785652508", "978-1785652509", 1, FALSE);
+		final Library NEW_BOOK = new Library("The Invisible Life of Addie LaRue", "V.E. Schwab", 560, "Fantasy Fiction", 1, FALSE);
 		MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.request(HttpMethod.POST, "/library/addBook");
 		mockRequest.contentType(MediaType.APPLICATION_JSON);
 		mockRequest.content(this.mapper.writeValueAsString(NEW_BOOK));
 		mockRequest.accept(MediaType.APPLICATION_JSON);
 
-		final Library SAVED_BOOK = new Library(4L, NEW_BOOK.getBookTitle(), NEW_BOOK.getAuthor(), NEW_BOOK.getPages(), NEW_BOOK.getISBN10(), NEW_BOOK.getISBN13(), NEW_BOOK.getQty(), NEW_BOOK.isAvailability());
+		final Library SAVED_BOOK = new Library(4L, NEW_BOOK.getBookTitle(), NEW_BOOK.getAuthor(), NEW_BOOK.getPages(), NEW_BOOK.getGenre(), NEW_BOOK.getQty(), NEW_BOOK.isAvailability());
 
 		ResultMatcher matchStatus = MockMvcResultMatchers.status().isCreated();
 		ResultMatcher matchContent = MockMvcResultMatchers.content()

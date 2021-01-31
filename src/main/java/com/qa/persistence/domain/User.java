@@ -30,7 +30,6 @@ public class User {
 	@NotNull
 	private String firstName;
 	private String lastName;
-	private int age;
 	private String userName;
 	private String password;
 	
@@ -39,19 +38,17 @@ public class User {
 	private List<Library> library = new ArrayList<>();
 	
 	
-	public User(Long id, @NotNull String firstName, String lastName, int age, String userName, String password) {
+	public User(Long id, @NotNull String firstName, String lastName, String userName, String password) {
 		Id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;
-		this.age = age;
 		this.userName = userName;
 		this.password = password;
 	}
 	
-	public User(@NotNull String firstName, String lastName, int age, String userName, String password) {
+	public User(@NotNull String firstName, String lastName, String userName, String password) {
 		this.firstName = firstName;
 		this.lastName = lastName;
-		this.age = age;
 		this.userName = userName;
 		this.password = password;
 	}

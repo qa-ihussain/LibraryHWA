@@ -15,16 +15,14 @@ public final class UserDTO {
 	private Long Id;
 	private String firstName;
 	private String lastName;
-	private int age;
 	private String userName;
 	private String password;
 
-	public UserDTO(Long id, String firstName, String lastName, int age, String userName, String password) {
+	public UserDTO(Long id, String firstName, String lastName, String userName, String password) {
 		super();
 		Id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;
-		this.age = age;
 		this.userName = userName;
 		this.password = password;
 	}

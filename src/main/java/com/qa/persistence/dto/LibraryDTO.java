@@ -19,14 +19,9 @@ public class LibraryDTO {
 	private String bookTitle;
 	private String author;
 	private int pages;
-	private String ISBN10;
-	private String ISBN13;
+	private String genre;
 	private int qty;
 	private boolean availability; 
 	
 	private List<UserDTO> user = new ArrayList<>();
-	
-	// maybe add boolean for availability and int for quantity of books available in
-	// library?
-
 }

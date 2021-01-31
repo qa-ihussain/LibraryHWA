@@ -1,6 +1,5 @@
 package com.qa.persistence.domain;
 
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -25,35 +24,32 @@ public class Library {
 	private String bookTitle;
 	private String author;
 	private int pages;
-	private String ISBN10;
-	private String ISBN13;
+	private String genre;
 	private int qty;
 	private boolean availability; 
 	
 	@ManyToOne(targetEntity = User.class)
 	private User users = null;
 
-	public Library(Long id, @NotNull String bookTitle, String author, int pages, String iSBN10, String iSBN13, int qty,
+	public Library(Long id, @NotNull String bookTitle, String author, int pages, String genre, int qty,
 			boolean availability) {
 		super();
 		this.id = id;
 		this.bookTitle = bookTitle;
 		this.author = author;
 		this.pages = pages;
-		ISBN10 = iSBN10;
-		ISBN13 = iSBN13;
+		this.genre = genre;
 		this.qty = qty;
 		this.availability = availability;
 	}
 	
-	public Library(@NotNull String bookTitle, String author, int pages, String iSBN10, String iSBN13, int qty,
+	public Library(@NotNull String bookTitle, String author, int pages, String genre, int qty,
 			boolean availability) {
 		super();
 		this.bookTitle = bookTitle;
 		this.author = author;
 		this.pages = pages;
-		ISBN10 = iSBN10;
-		ISBN13 = iSBN13;
+		this.genre = genre;
 		this.qty = qty;
 		this.availability = availability;
 	}

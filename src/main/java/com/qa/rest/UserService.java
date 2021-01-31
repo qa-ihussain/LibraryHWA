@@ -23,12 +23,12 @@ import com.qa.services.UserService;
 @RestController
 @RequestMapping("/user")
 @CrossOrigin
-public class UserController {
+public class UserService {
 
 	private UserService service;
 
 	@Autowired
-	public UserController(UserService service) {
+	public UserService(UserService service) {
 		super();
 		this.service = service;
 	}

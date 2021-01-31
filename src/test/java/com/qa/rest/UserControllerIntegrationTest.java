@@ -48,8 +48,8 @@ public class UserControllerIntegrationTest {
 	@Autowired
 	private ObjectMapper mapper;
 
-	private final User TEST_USER_FROM_DB = new User(1L, "Claude", "Duvalier", 23, "cd52", "password");
-	private final User TEST_USER2_FROM_DB = new User(2L, "Levi", "Ackerman", 27, "lackerman", "password");
+	private final User TEST_USER_FROM_DB = new User(1L, "Iqra", "Hussain", "iqra", "password");
+	private final User TEST_USER2_FROM_DB = new User(2L, "Abigail", "Jones", "ajones", "password");
 
 	private UserDTO mapToDTO(User user) {
 		return this.modelMapper.map(user, UserDTO.class);
@@ -57,13 +57,13 @@ public class UserControllerIntegrationTest {
 
 	@Test
 	void testCreateUser() throws Exception {
-		final User NEW_USER = new User("Tasha", "Lee", 17, "tlee", "password");
+		final User NEW_USER = new User(3L, "Tasha", "Lee", "tlee", "password");
 		MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.request(HttpMethod.POST, "/user/createUser");
 		mockRequest.contentType(MediaType.APPLICATION_JSON);
 		mockRequest.content(this.mapper.writeValueAsString(NEW_USER));
 		mockRequest.accept(MediaType.APPLICATION_JSON);
 
-		final User SAVED_USER = new User(3L, NEW_USER.getFirstName(), NEW_USER.getLastName(), NEW_USER.getAge(), NEW_USER.getUserName(), NEW_USER.getPassword());
+		final User SAVED_USER = new User(3L, NEW_USER.getFirstName(), NEW_USER.getLastName(), NEW_USER.getUserName(), NEW_USER.getPassword());
 
 		ResultMatcher matchStatus = MockMvcResultMatchers.status().isCreated();
 		ResultMatcher matchContent = MockMvcResultMatchers.content()
@@ -94,9 +94,9 @@ public class UserControllerIntegrationTest {
 
 	@Test
 	void testUpdateUser() throws Exception {
-		UserDTO newUser = new UserDTO(TEST_USER_FROM_DB.getId(), "Eren", "Yeager", 17, "eren", "password");
+		UserDTO newUser = new UserDTO(TEST_USER_FROM_DB.getId(), "Iqra", "Hussain", "iqra", "newpass");
 		User updatedUser = new User(this.TEST_USER_FROM_DB.getId(), newUser.getFirstName(), newUser.getLastName(),
-				newUser.getAge(), newUser.getUserName(), newUser.getPassword());
+				newUser.getUserName(), newUser.getPassword());
 
 		String result = this.mock
 				.perform(request(HttpMethod.PUT, "/user/updateUser/?id=" + this.TEST_USER_FROM_DB.getId())

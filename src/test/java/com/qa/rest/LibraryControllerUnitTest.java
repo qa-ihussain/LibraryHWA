@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,15 +17,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.qa.persistence.dto.UserDTO;
-import com.qa.persistence.domain.User;
-import com.qa.services.UserService;
+import com.qa.persistence.dto.LibraryDTO;
+import com.qa.persistence.domain.Library;
+import com.qa.services.LibraryService;
 
 @SpringBootTest
 class UserControllerUnitTest {
 
 	@Autowired
-	private UserController controller;
+	private UserService controller;
 
 	@MockBean
 	private UserService service;
