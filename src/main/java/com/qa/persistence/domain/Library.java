@@ -1,5 +1,6 @@
 package com.qa.persistence.domain;
 
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -7,50 +8,106 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Library {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
+	private Long Id;
+
 	@NotNull
 	private String bookTitle;
 	private String author;
-	private int pages;
 	private String genre;
-	private int qty;
-	private boolean availability; 
-	
-	@ManyToOne(targetEntity = User.class)
-	private User users = null;
 
-	public Library(Long id, @NotNull String bookTitle, String author, int pages, String genre, int qty,
-			boolean availability) {
+	@NotNull
+	private int pages;
+	private int qty;
+
+	@ManyToOne
+	private Users users;
+
+	public Library() {
 		super();
-		this.id = id;
+	}
+
+
+	public Library(Long id, @NotNull String bookTitle, String author, String genre, @NotNull int pages, int qty,
+			Users users) {
+		super();
+		Id = id;
 		this.bookTitle = bookTitle;
 		this.author = author;
-		this.pages = pages;
 		this.genre = genre;
+		this.pages = pages;
 		this.qty = qty;
-		this.availability = availability;
+		this.users = users;
+	}
+
+
+
+	public Long getId() {
+		return Id;
+	}
+
+	public void setId(Long id) {
+		Id = id;
+	}
+
+	public String getBookTitle() {
+		return bookTitle;
+	}
+
+	public void setBookTitle(String bookTitle) {
+		this.bookTitle = bookTitle;
+	}
+
+	public String getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(String author) {
+		this.author = author;
+	}
+
+	public String getGenre() {
+		return genre;
+	}
+
+	public void setGenre(String genre) {
+		this.genre = genre;
+	}
+
+	public int getPages() {
+		return pages;
+	}
+
+	public void setPages(int pages) {
+		this.pages = pages;
+	}
+
+	public int getQty() {
+		return qty;
+	}
+
+	public void setQty(int qty) {
+		this.qty = qty;
+	}
+
+	public Users getUsers() {
+		return users;
+	}
+
+	public void setUsers(Users users) {
+		this.users = users;
+	}
+
+
+	@Override
+	public String toString() {
+		return "Library [Id=" + Id + ", bookTitle=" + bookTitle + ", author=" + author + ", genre=" + genre + ", pages="
+				+ pages + ", qty=" + qty + ", Users=" + users + "]";
 	}
 	
-	public Library(@NotNull String bookTitle, String author, int pages, String genre, int qty,
-			boolean availability) {
-		super();
-		this.bookTitle = bookTitle;
-		this.author = author;
-		this.pages = pages;
-		this.genre = genre;
-		this.qty = qty;
-		this.availability = availability;
-	}
 }

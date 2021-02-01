@@ -1,10 +1,5 @@
 package com.qa.rest;
 
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -26,91 +20,110 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.qa.persistence.dto.LibraryDTO;
 import com.qa.LibraryApplication;
 import com.qa.persistence.domain.Library;
+import com.qa.persistence.dto.LibraryDTO;
 
 @SpringBootTest(classes = LibraryApplication.class)
 @AutoConfigureMockMvc
-@WebAppConfiguration
 @Sql(scripts = { "classpath:schema-test.sql",
 		"classpath:data-test.sql" }, executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-@ActiveProfiles(profiles="test")
-
+@ActiveProfiles(profiles = "test")
 public class LibraryControllerIntegrationTest {
 
-	private static final boolean FALSE = false;
-
-	private static final boolean TRUE = false;
 
 	@Autowired
 	private MockMvc mock;
 
 	@Autowired
-	private ModelMapper modelMapper;
+	private ModelMapper mapper;
 
 	@Autowired
-	private ObjectMapper mapper;
+	private ObjectMapper jsonifier;
 
-	private final Library TEST_BOOK_FROM_DB = new Library(1L, "The Midnight Library", "Matt Haig", 304, "Science Fiction", 2, TRUE);
-	private final Library TEST_BOOK2_FROM_DB = new Library(2L, "Extraterrestrial: The First Sign of Intelligent Life Beyond Earth", "Avi Loeb", 240, "Science", 1, FALSE);
-	private final Library TEST_BOOK3_FROM_DB = new Library(3L, "Kakegurui - Compulsive Gambler - Vol. 1", "Homura Kawamoto and Toru Naomura", 240, "Manga", 2, TRUE);
-
-	private LibraryDTO mapToDTO(Library library) {
-		return this.modelMapper.map(library, LibraryDTO.class);
+	private LibraryDTO mapToDTO(Library model) {
+		return this.mapper.map(model, LibraryDTO.class);
 	}
 
+	private final int TEST_ID = 1;
+
 	@Test
-	void testAddBook() throws Exception {
-		final Library NEW_BOOK = new Library("The Invisible Life of Addie LaRue", "V.E. Schwab", 560, "Fantasy Fiction", 1, FALSE);
-		MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.request(HttpMethod.POST, "/library/addBook");
-		mockRequest.contentType(MediaType.APPLICATION_JSON);
-		mockRequest.content(this.mapper.writeValueAsString(NEW_BOOK));
-		mockRequest.accept(MediaType.APPLICATION_JSON);
+	public void createBook() throws Exception {
+		Library testLibrary = new Library();
+		MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.request(HttpMethod.POST, "/library/addBook")
+				.contentType(MediaType.APPLICATION_JSON).content(this.jsonifier.writeValueAsString(testLibrary))
+				.accept(MediaType.APPLICATION_JSON);
 
-		final Library SAVED_BOOK = new Library(4L, NEW_BOOK.getBookTitle(), NEW_BOOK.getAuthor(), NEW_BOOK.getPages(), NEW_BOOK.getGenre(), NEW_BOOK.getQty(), NEW_BOOK.isAvailability());
+		testLibrary.setId(3L);
 
-		ResultMatcher matchStatus = MockMvcResultMatchers.status().isCreated();
 		ResultMatcher matchContent = MockMvcResultMatchers.content()
-				.json(this.mapper.writeValueAsString(this.mapToDTO(SAVED_BOOK)));
-		this.mock.perform(mockRequest)
-		.andExpect(matchStatus)
-		.andExpect(matchContent);
+				.json(this.jsonifier.writeValueAsString(mapToDTO(testLibrary)));
+		ResultMatcher matchStatus = MockMvcResultMatchers.status().isCreated();
 
+		this.mock.perform(mockRequest).andExpect(matchStatus).andExpect(matchContent);
 	}
 
 	@Test
-	void testDeleteBook() throws Exception {
-		this.mock.perform(request(HttpMethod.DELETE, "/library/deleteBook/" + this.TEST_BOOK_FROM_DB.getId()))
-				.andExpect(status().isNoContent());
-	}
-
-	@Test
-	void testGetAllBooks() throws Exception {
+	public void readAll() throws Exception {
 		List<LibraryDTO> bookList = new ArrayList<>();
-		bookList.add(this.mapToDTO(TEST_BOOK_FROM_DB));
-		bookList.add(this.mapToDTO(TEST_BOOK2_FROM_DB));
-		bookList.add(this.mapToDTO(TEST_BOOK3_FROM_DB));
+		bookList.add(new LibraryDTO(1L, "The Midnight Library", "Matt Haig", "Science Fiction", 304, 2,
+				new ArrayList<>()));
+		bookList.add(new LibraryDTO(2L, "Extraterrestrial: The First Sign of Intelligent Life Beyond Earth", "Avi Loeb",
+				"Science", 240, 1, new ArrayList<>()));
+		bookList.add(new LibraryDTO(2L, "Kakegurui - Compulsive Gambler - Vol. 1", "Homura Kawamoto and Toru Naomura",
+				"Manga", 240, 2, new ArrayList<>()));
 
-		String content = this.mock.perform(request(HttpMethod.GET, "/user/getAllBooks").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.request(HttpMethod.GET, "/library/readAll")
+				.contentType(MediaType.APPLICATION_JSON)
+				// .content(this.jsonifier.writeValueAsString(bookList))
+				.accept(MediaType.APPLICATION_JSON);
 
-		assertEquals(this.mapper.writeValueAsString(bookList), content);
+		ResultMatcher matchContent = MockMvcResultMatchers.content().json(this.jsonifier.writeValueAsString(bookList));
+		ResultMatcher matchStatus = MockMvcResultMatchers.status().isOk();
+
+		this.mock.perform(mockRequest).andExpect(matchStatus).andExpect(matchContent);
 	}
 
-//	@Test
-//	void testUpdateLibrary() throws Exception {
-//		LibraryDTO newLibrary = new LibraryDTO(TEST_BOOK_FROM_DB.getId(), "The Midnight Library", "Matt Haig", 304, 0525559477, "978-0525559474", 2, FALSE);
-//		Library updatedLibrary = new Library(this.TEST_BOOK_FROM_DB.getId(), newBook.getBookTitle(), newBook.getAuthor(),
-//				newBook.getPages(), newBook.getUserName(), newBook.getPassword());
-//
-//		String result = this.mock
-//				.perform(request(HttpMethod.PUT, "/user/updateUser/?id=" + this.TEST_USER_FROM_DB.getId())
-//						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-//						.content(this.mapper.writeValueAsString(newBook)))
-//				.andExpect(status().isAccepted()).andReturn().getResponse().getContentAsString();
-//
-//		assertEquals(this.mapper.writeValueAsString(this.mapToDTO(updatedUser)), result);
-//	}
+	@Test
+	public void readOneBook() throws Exception {
+		Library testLibrary = new Library(1L, "The Midnight Library", "Matt Haig", "Science Fiction", 304, 2,
+				null);
+
+		MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders
+				.request(HttpMethod.GET, "/library/readBook/" + TEST_ID).contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON);
+
+		ResultMatcher matchContent = MockMvcResultMatchers.content()
+				.json(this.jsonifier.writeValueAsString(testLibrary));
+		ResultMatcher matchStatus = MockMvcResultMatchers.status().isOk();
+
+		this.mock.perform(mockRequest).andExpect(matchStatus).andExpect(matchContent);
+	}
+
+	@Test
+	public void updateLibrary() throws Exception {
+		LibraryDTO testLibraryDTO = new LibraryDTO(1L, "The Midnight Library", "Matt Haig", "Science Fiction", 304, 2,
+				new ArrayList<>());
+
+		MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders
+				.request(HttpMethod.PUT, "/library/updateBook/" + TEST_ID).contentType(MediaType.APPLICATION_JSON)
+				.content(this.jsonifier.writeValueAsString(testLibraryDTO)).accept(MediaType.APPLICATION_JSON);
+
+		ResultMatcher matchContent = MockMvcResultMatchers.content()
+				.json(this.jsonifier.writeValueAsString(testLibraryDTO));
+		ResultMatcher matchStatus = MockMvcResultMatchers.status().isAccepted();
+
+		this.mock.perform(mockRequest).andExpect(matchStatus).andExpect(matchContent);
+	}
+
+	@Test
+	public void deleteBook() throws Exception {
+		MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.request(HttpMethod.DELETE,
+				"/library/deleteBook/" + TEST_ID);
+
+		ResultMatcher matchStatus = MockMvcResultMatchers.status().isNoContent();
+
+		this.mock.perform(mockRequest).andExpect(matchStatus);
+	}
 
 }

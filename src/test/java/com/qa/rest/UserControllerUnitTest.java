@@ -1,9 +1,6 @@
 package com.qa.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,95 +16,102 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.qa.persistence.dto.UserDTO;
-import com.qa.persistence.domain.User;
+import com.qa.LibraryApplication;
+import com.qa.persistence.domain.Users;
+import com.qa.persistence.dto.UsersDTO;
 import com.qa.services.UserService;
 
-@SpringBootTest
-class UserControllerUnitTest {
+@SpringBootTest(classes = LibraryApplication.class)
 
+public class UserControllerUnitTest {
+	
 	@Autowired
 	private UserController controller;
-
+	
 	@MockBean
-	private UserService service;
-
-	private List<User> userList;
-
-	private UserDTO testUser;
-
-	private User testUserWithID;
-
-	private UserDTO userDTO;
-
-	private final Long id = 1L;
-
+	UserService service;
+	
+	private List<Users> userList;
+	private UsersDTO userDTO;
+	private Users userTest;
+	private Long Id;
 	private ModelMapper mapper = new ModelMapper();
-
-	private UserDTO mapToDTO(User user) {
-		return this.mapper.map(user, UserDTO.class);
+	
+	private UsersDTO mapToDTO(Users model) {
+		return this.mapper.map(model, UsersDTO.class);
 	}
-
+	
 	@BeforeEach
 	void init() {
+		this.Id = 1L;
 		this.userList = new ArrayList<>();
-		this.testUser = this.mapToDTO(new User(id, "Iqra", "Hussain", "iqra", "password"));
-
-		this.testUserWithID = new User(id, testUser.getFirstName(), testUser.getLastName(), testUser.getUserName(), testUser.getPassword());
-		this.testUserWithID.setId(id);
-
-		this.userList.add(testUserWithID);
-		this.userDTO = this.mapToDTO(testUserWithID);
+		this.userDTO = new UsersDTO(Id, "Iqra", "Hussain", "ih@mail.com", "iqra", "password");
+		this.userTest = new Users(Id,"Iqra", "Hussain", "ih@mail.com", "iqra", "password", null);
+		
+		this.userList.add(userTest);
+		this.userDTO = this.mapToDTO(userTest);
+	}
+	
+	@Test
+	public void createUserTest() {
+		Mockito.when(this.service.createUser(userTest)).thenReturn(userDTO);
+		
+		assertThat(new ResponseEntity<UsersDTO>(userDTO, HttpStatus.CREATED))
+					.usingRecursiveComparison().isEqualTo(controller.createBook(userTest));
+		
+		Mockito.verify(this.service, Mockito.times(1)).createUser(userTest);
+	}
+	
+	@Test
+	public void readOneUserTest() {
+		Mockito.when(this.service.readOneUser(Id)).thenReturn(userDTO);
+		
+		assertThat(ResponseEntity.ok(this.service.readOneUser(Id)))
+				.usingRecursiveComparison().isEqualTo(controller.readBook(Id));
+		
+		Mockito.verify(this.service, Mockito.times(2)).readOneUser(Id);
+	}
+	
+	@Test
+	public void readAllTest() {
+		Mockito.when(this.service.readAll()).thenReturn(userList.stream().map
+				(this::mapToDTO).collect(Collectors.toList()));
+		
+		assertThat(ResponseEntity.ok(this.service.readAll()))
+				.usingRecursiveComparison().isEqualTo(controller.readAll());
+		
+		Mockito.verify(this.service, Mockito.times(2)).readAll();
+	}
+	
+	@Test
+	public void updateUserTest() {
+		Users updatedUser = new Users(1L, "Iqra", "Hussain", "ih@mail.com", "iqra", "password", null);
+		UsersDTO updatedDTO = new UsersDTO(1L,"Iqra", "Hussain", "ih@mail.com", "iqra", "newpass");
+		
+		Mockito.when(this.service.update(Id, updatedUser)).thenReturn(updatedDTO);
+		
+		assertThat(new ResponseEntity<>(updatedDTO, HttpStatus.ACCEPTED))
+					.usingRecursiveComparison()
+					.isEqualTo(controller.updateUser(Id, updatedUser));
+		
+		Mockito.verify(this.service, Mockito.times(1)).update(Id, updatedUser);
 	}
 
 	@Test
-	void createUserTest() {
-		when(this.service.createUser(testUser)).thenReturn(this.userDTO);
-
-		assertThat(new ResponseEntity<UserDTO>(this.userDTO, HttpStatus.CREATED))
-				.isEqualTo(this.controller.createUser(testUser));
-
-		verify(this.service, times(1)).createUser(this.testUser);
-	}
-
+	public void deleteTest() {
+		Mockito.when(this.service.delete(Id)).thenReturn(true);
+		
+		assertThat(new ResponseEntity<>(HttpStatus.NO_CONTENT))
+				.usingRecursiveComparison().isEqualTo(controller.deleteUser(Id));
+		
+		Mockito.verify(this.service, Mockito.times(1)).delete(Id);
+	}	
+	
 	@Test
-	void deleteUserTest() {
-		this.controller.deleteUser(id);
-
-		verify(this.service, times(1)).deleteUser(id);
+	public void deleteFailTest() {
+		controller.deleteUser(Id);
+		
+		Mockito.verify(this.service, Mockito.times(1)).delete(Id);
 	}
 
-	@Test
-	void findUserByIDTest() {
-		when(this.service.findUserByID(this.id)).thenReturn(this.userDTO);
-
-		assertThat(new ResponseEntity<UserDTO>(this.userDTO, HttpStatus.OK))
-				.isEqualTo(this.controller.getUser(this.id));
-
-		verify(this.service, times(1)).findUserByID(this.id);
-	}
-
-// @Test
-//	void getAllUsersTest() {
-//
-//		when(service.getUser()).thenReturn(this.userList.stream().map(this::mapToDTO).collect(Collectors.toList()));
-//
-////		assertThat(this.controller.getUser(id).getBody().isEmpty()).isFalse();
-//
-//		verify(service, times(1)).getUser();
-//	}
-
-	@Test
-	void updateUserTest() {
-		// given
-		UserDTO newUser = new UserDTO(id, "Iqra", "Hussain", "tlee", "password");
-		UserDTO updatedUser = new UserDTO(this.id, newUser.getFirstName(), newUser.getLastName(), newUser.getUserName(), newUser.getPassword());
-
-		when(this.service.updateUser(newUser, this.id)).thenReturn(updatedUser);
-
-		assertThat(new ResponseEntity<UserDTO>(updatedUser, HttpStatus.ACCEPTED))
-				.isEqualTo(this.controller.updateUser(this.id, newUser));
-
-		verify(this.service, times(1)).updateUser(newUser, this.id);
-	}
 }

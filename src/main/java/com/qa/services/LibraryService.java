@@ -7,58 +7,54 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.qa.persistence.dto.LibraryDTO;
-import com.qa.exceptions.BookNotFoundException;
 import com.qa.persistence.domain.Library;
+import com.qa.persistence.dto.LibraryDTO;
 import com.qa.persistence.repo.LibraryRepo;
+import com.qa.utils.MyBeanUtils;
 
 @Service
 public class LibraryService {
 
 	private LibraryRepo repo;
-
 	private ModelMapper mapper;
 
 	@Autowired
 	public LibraryService(LibraryRepo repo, ModelMapper mapper) {
+		super();
 		this.repo = repo;
 		this.mapper = mapper;
 	}
 
-	private LibraryDTO mapToDTO(Library library) {
-		return this.mapper.map(library, LibraryDTO.class);
+	private LibraryDTO mapToDTO(Library model) {
+		return this.mapper.map(model, LibraryDTO.class);
 	}
 
-	private Library mapFromDTO(LibraryDTO library) {
-		return this.mapper.map(library, Library.class);
+	// Create
+	public LibraryDTO createBook(Library model) {
+		return mapToDTO(this.repo.save(model));
 	}
 
-	public LibraryDTO addBook(LibraryDTO library) {
-		Library toSave = this.mapFromDTO(library);
-		Library saved = this.repo.save(toSave);
-		return this.mapToDTO(saved);
+	// Read
+	public LibraryDTO readOneBook(Long Id) {
+		return this.mapToDTO(this.repo.findById(Id).orElseThrow());
 	}
 
-	public boolean deleteBook(Long id) {
-		if (!this.repo.existsById(id)) {
-			throw new BookNotFoundException();
-		}
-		this.repo.deleteById(id);
-		return !this.repo.existsById(id);
+	public List<LibraryDTO> readAll() {
+		List<Library> bookLists = this.repo.findAll();
+		List<LibraryDTO> bookListDTO = bookLists.stream().map(this::mapToDTO).collect(Collectors.toList());
+		return bookListDTO;
 	}
 
-	public LibraryDTO findBookByID(Long id) {
-		return this.mapToDTO(this.repo.findById(id).orElseThrow(BookNotFoundException::new));
+	// Update
+	public LibraryDTO update(Long Id, Library library) {
+		Library updatedLibrary = this.repo.findById(Id).orElseThrow();
+		MyBeanUtils.mergeNotNull(library, updatedLibrary);
+		return this.mapToDTO(this.repo.save(updatedLibrary));
 	}
 
-	public List<LibraryDTO> readBooks() {
-		return this.repo.findAll().stream().map(this::mapToDTO).collect(Collectors.toList());
+	// Delete
+	public boolean delete(Long Id) {
+		this.repo.deleteById(Id);
+		return !this.repo.existsById(Id);
 	}
-
-	public LibraryDTO updateLibrary(LibraryDTO library, Long id) {
-		Library toUpdate = this.repo.findById(id).orElseThrow(BookNotFoundException::new);
-		toUpdate.setBookTitle(library.getBookTitle());
-		return this.mapToDTO(this.repo.save(toUpdate));
-	}
-
 }

@@ -1,15 +1,14 @@
 package com.qa.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,95 +16,101 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.qa.persistence.dto.LibraryDTO;
+import com.qa.LibraryApplication;
 import com.qa.persistence.domain.Library;
+import com.qa.persistence.dto.LibraryDTO;
 import com.qa.services.LibraryService;
 
-@SpringBootTest
-class UserControllerUnitTest {
+@SpringBootTest(classes = LibraryApplication.class)
+public class LibraryControllerUnitTest {
 
 	@Autowired
-	private UserService controller;
-
+	private LibraryController controller;
+	
 	@MockBean
-	private UserService service;
-
-	private List<User> userList;
-
-	private UserDTO testUser;
-
-	private User testUserWithID;
-
-	private UserDTO userDTO;
-
-	private final Long id = 1L;
-
+	private LibraryService service;
+	
+	private List<Library> bookList;
+	private LibraryDTO libraryDTO;
+	private Library testLibrary;
+	private Long Id;
 	private ModelMapper mapper = new ModelMapper();
-
-	private UserDTO mapToDTO(User user) {
-		return this.mapper.map(user, UserDTO.class);
+	
+	private LibraryDTO mapToDTO(Library model) {
+		return this.mapper.map(model, LibraryDTO.class);
 	}
-
+	
 	@BeforeEach
 	void init() {
-		this.userList = new ArrayList<>();
-		this.testUser = this.mapToDTO(new User(id, "Iqra", "Hussain", "iqra", "password"));
-
-		this.testUserWithID = new User(id, testUser.getFirstName(), testUser.getLastName(), testUser.getUserName(), testUser.getPassword());
-		this.testUserWithID.setId(id);
-
-		this.userList.add(testUserWithID);
-		this.userDTO = this.mapToDTO(testUserWithID);
+		this.Id = 1L;
+		this.bookList = new ArrayList<>();
+		this.testLibrary = new Library(Id, "The Midnight Library", "Matt Haig", "Science Fiction", 304, 2, null);
+		this.libraryDTO = new LibraryDTO(Id,"The Midnight Library", "Matt Haig", "Science Fiction", 304, 2, null);
+		
+		this.bookList.add(testLibrary);
+		this.libraryDTO = this.mapToDTO(testLibrary);
 	}
-
+	
 	@Test
-	void createUserTest() {
-		when(this.service.createUser(testUser)).thenReturn(this.userDTO);
-
-		assertThat(new ResponseEntity<UserDTO>(this.userDTO, HttpStatus.CREATED))
-				.isEqualTo(this.controller.createUser(testUser));
-
-		verify(this.service, times(1)).createUser(this.testUser);
+	public void createBookTest() {
+		Mockito.when(this.service.createBook(testLibrary)).thenReturn(libraryDTO);
+		
+		assertThat(new ResponseEntity<LibraryDTO>(libraryDTO, HttpStatus.CREATED))
+				.usingRecursiveComparison().isEqualTo(controller.createBook(testLibrary));
+		
+		Mockito.verify(this.service, Mockito.times(1)).createBook(testLibrary);
 	}
-
+	
 	@Test
-	void deleteUserTest() {
-		this.controller.deleteUser(id);
-
-		verify(this.service, times(1)).deleteUser(id);
+	public void readOneBookTest() {
+		Mockito.when(this.service.readOneBook(Id)).thenReturn(libraryDTO);
+		
+		assertThat(ResponseEntity.ok(this.service.readOneBook(Id)))
+				.usingRecursiveComparison().isEqualTo(controller.readBook(Id));
+		
+		Mockito.verify(this.service, Mockito.times(2)).readOneBook(Id);
 	}
-
+	
 	@Test
-	void findUserByIDTest() {
-		when(this.service.findUserByID(this.id)).thenReturn(this.userDTO);
-
-		assertThat(new ResponseEntity<UserDTO>(this.userDTO, HttpStatus.OK))
-				.isEqualTo(this.controller.getUser(this.id));
-
-		verify(this.service, times(1)).findUserByID(this.id);
+	public void readAllTest() {
+		Mockito.when(this.service.readAll()).thenReturn(bookList.stream().map
+				(this::mapToDTO).collect(Collectors.toList()));
+		
+		assertThat(ResponseEntity.ok(this.service.readAll()))
+				.usingRecursiveComparison().isEqualTo(controller.readAll());
+		
+		Mockito.verify(this.service, Mockito.times(2)).readAll();
 	}
-
-// @Test
-//	void getAllUsersTest() {
-//
-//		when(service.getUser()).thenReturn(this.userList.stream().map(this::mapToDTO).collect(Collectors.toList()));
-//
-////		assertThat(this.controller.getUser(id).getBody().isEmpty()).isFalse();
-//
-//		verify(service, times(1)).getUser();
-//	}
-
+	
 	@Test
-	void updateUserTest() {
-		// given
-		UserDTO newUser = new UserDTO(id, "Iqra", "Hussain", "tlee", "password");
-		UserDTO updatedUser = new UserDTO(this.id, newUser.getFirstName(), newUser.getLastName(), newUser.getUserName(), newUser.getPassword());
-
-		when(this.service.updateUser(newUser, this.id)).thenReturn(updatedUser);
-
-		assertThat(new ResponseEntity<UserDTO>(updatedUser, HttpStatus.ACCEPTED))
-				.isEqualTo(this.controller.updateUser(this.id, newUser));
-
-		verify(this.service, times(1)).updateUser(newUser, this.id);
+	public void updateBookTest() {
+		Library updatedLibrary = new Library(Id,"The Midnight Library", "Matt Haig", "Science Fiction", 304, 2, null);
+		LibraryDTO updatedDTO = new LibraryDTO(Id, "The Midnight Library", "Matt Haig", "Science Fiction", 304, 1, null);
+		
+		Mockito.when(this.service.update(Id, updatedLibrary)).thenReturn(updatedDTO);
+		
+		assertThat(new ResponseEntity<>(updatedDTO, HttpStatus.ACCEPTED))
+				.usingRecursiveComparison().isEqualTo
+				(controller.updateLibrary(Id, updatedLibrary));
+		
+		Mockito.verify(this.service, Mockito.times(1)).update(Id, updatedLibrary);		
 	}
+	
+	@Test
+	public void deleteTest() {
+		Mockito.when(this.service.delete(Id)).thenReturn(true);
+		
+		assertThat(new ResponseEntity<>(HttpStatus.NO_CONTENT))
+				.usingRecursiveComparison().isEqualTo(controller.deleteBook(Id));
+		
+		Mockito.verify(this.service, Mockito.times(1)).delete(Id);
+	}
+	
+	@Test
+	public void deleteFailTest() {
+		controller.deleteBook(Id);
+		
+		Mockito.verify(this.service, Mockito.times(1)).delete(Id);	
+	}
+	
 }
